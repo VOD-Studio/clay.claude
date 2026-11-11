@@ -7,6 +7,8 @@ README under "Releasing".
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-11
+
 ### Added
 
 - Clay Dark and Clay Light themes, generated from the vendored Clay palette.
