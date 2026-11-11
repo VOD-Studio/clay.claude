@@ -5,17 +5,8 @@ local M = {}
 
 M.variants = { "dark", "light" }
 
-function M.clay_nvim_dir()
-  return os.getenv("CLAY_NVIM") or "../clay.nvim"
-end
-
 function M.load_palette()
-  local path = M.clay_nvim_dir() .. "/lua/clay/palette.lua"
-  local chunk, err = loadfile(path)
-  if not chunk then
-    error("cannot load " .. path .. " (set CLAY_NVIM to the clay.nvim checkout): " .. err, 0)
-  end
-  return chunk()
+  return dofile("palette.lua")
 end
 
 function M.load_mapping()

@@ -4,7 +4,7 @@ VARIANT ?= dark
 
 .PHONY: build check preview
 
-# Regenerate themes from ../clay.nvim (override with CLAY_NVIM=/path).
+# Regenerate themes from palette.lua and mapping.lua.
 build:
 	$(LUA) scripts/build.lua
 

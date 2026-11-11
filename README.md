@@ -45,8 +45,8 @@ Inside tmux, Claude Code limits itself to 256 colors. Set
 ## How colors are chosen
 
 `mapping.lua` maps each of Claude Code's 72 theme keys to a Clay palette role;
-`scripts/build.lua` resolves them against clay.nvim's `lua/clay/palette.lua`,
-the single source of color values.
+`scripts/build.lua` resolves them against `palette.lua`, the single source of
+color values (taken from clay.nvim's `lua/clay/palette.lua`).
 
 | Claude Code | Clay |
 | --- | --- |
@@ -72,7 +72,7 @@ Values the design system does not define are derived:
 ## Development
 
 ```sh
-make build   # regenerate themes/ from ../clay.nvim (CLAY_NVIM=/path to override)
+make build   # regenerate themes/ from palette.lua and mapping.lua
 make check   # verify the themes
 ```
 

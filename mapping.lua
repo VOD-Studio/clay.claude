@@ -1,7 +1,7 @@
 -- Claude Code theme keys mapped to Clay palette roles.
 --
 -- Each entry is { claude_code_key, color }, where color is one of:
---   "key"                  a key of clay.nvim's lua/clay/palette.lua
+--   "key"                  a key of palette.lua
 --   { "shimmer", "key" }   the animated highlight of a color: 35% toward
 --                          `bright` in dark, 35% toward `bg` in light, so it
 --                          is always the lighter frame, as in the built-ins

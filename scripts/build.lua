@@ -1,5 +1,4 @@
--- Generate themes/clay-{dark,light}.json from clay.nvim's palette and
--- mapping.lua. Usage: lua scripts/build.lua (from the repository root).
+-- Generate themes/clay-{dark,light}.json from palette.lua and mapping.lua. Usage: lua scripts/build.lua (from the repository root).
 
 package.path = "scripts/?.lua;" .. package.path
 local clay = require("clay")

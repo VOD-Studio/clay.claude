@@ -1,5 +1,5 @@
 -- Check the generated themes against the palette, the installed Claude Code,
--- and the porting checklist in clay.nvim's design/clay-design-system.md.
+-- and the Clay design checklist.
 -- Usage: lua scripts/check.lua (from the repository root).
 -- Set CLAUDE_BIN to the Claude Code executable if it is not found.
 
@@ -45,7 +45,7 @@ for _, variant in ipairs(clay.variants) do
 end
 
 local mapping = clay.load_mapping()
-local palette_ok, palette = pcall(clay.load_palette)
+local palette = clay.load_palette()
 
 -- Color math -----------------------------------------------------------------
 
@@ -79,11 +79,7 @@ end
 
 -- Generated output -----------------------------------------------------------
 
-test("themes match a fresh build from clay.nvim", function()
-  if not palette_ok then
-    print("     " .. tostring(palette))
-    return "skip"
-  end
+test("themes match a fresh build", function()
   for _, variant in ipairs(clay.variants) do
     local want = clay.theme_json(clay.theme(palette, mapping, variant))
     if clay.read(clay.theme_path(variant)) ~= want then
@@ -210,9 +206,6 @@ end)
 -- Design checklist -----------------------------------------------------------
 
 local function each(fn)
-  if not palette_ok then
-    return "skip"
-  end
   for _, variant in ipairs(clay.variants) do
     fn(variant, themes[variant].overrides, palette[variant])
   end
