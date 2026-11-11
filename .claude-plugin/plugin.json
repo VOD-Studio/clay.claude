@@ -1,0 +1,10 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "clay",
+  "version": "0.1.0",
+  "description": "Clay themes for Claude Code: grayscale hierarchy with a single Clay accent, in dark and light variants.",
+  "author": {
+    "name": "xfy"
+  },
+  "keywords": ["theme", "clay", "grayscale"]
+}

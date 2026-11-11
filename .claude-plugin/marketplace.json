@@ -1,0 +1,13 @@
+{
+  "name": "clay",
+  "owner": {
+    "name": "xfy"
+  },
+  "plugins": [
+    {
+      "name": "clay",
+      "source": "./",
+      "description": "Clay themes for Claude Code: grayscale hierarchy with a single Clay accent, in dark and light variants."
+    }
+  ]
+}
