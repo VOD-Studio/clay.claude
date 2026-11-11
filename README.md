@@ -99,3 +99,33 @@ Run `make check` after upgrading Claude Code; new theme keys need an entry in
 `mapping.lua`.
 
 Commit generated themes together with the mapping change that produced them.
+
+## Releasing
+
+Claude Code only offers an update when the plugin's version string changes, so
+pushed commits reach users only through a release. The version lives in
+`.claude-plugin/plugin.json` alone (never in the `marketplace.json` entry,
+which `plugin.json` would silently override) and follows
+[SemVer](https://semver.org):
+
+- **major**: breaks existing settings, such as renaming a theme file or the
+  plugin, which changes `custom:clay:clay-dark`;
+- **minor**: a new variant or a visible color change;
+- **patch**: fixes to individual colors, or entries for new Claude Code keys.
+
+Record changes under `## [Unreleased]` in `CHANGELOG.md` as you commit them,
+then:
+
+```sh
+make release VERSION=minor   # or patch, major, or an explicit X.Y.Z
+git push origin HEAD clay--v0.2.0
+```
+
+`make release` requires a clean tree and non-empty Unreleased notes, runs
+`make check`, bumps `plugin.json`, moves the notes under the new version with
+today's date, commits `chore(release): X.Y.Z` and creates the annotated tag
+`clay--vX.Y.Z` with `claude plugin tag`. It does not push.
+
+`make check` also verifies that the version is `MAJOR.MINOR.PATCH`, is not
+behind the latest tag, and that every tag has a changelog section; it notes
+when `themes/` changed since the last release.

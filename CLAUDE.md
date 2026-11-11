@@ -15,6 +15,7 @@ make build                 # regenerate themes/ from palette.lua + mapping.lua
 make check                 # verify themes (freshness, key coverage, design checklist)
 make preview               # run claude with this plugin and Clay Dark, session-only
 make preview VARIANT=light
+make release VERSION=minor # bump, date changelog, commit, tag clay--vX.Y.Z (no push)
 ```
 
 `make check` has no single-test selector; it runs every `test(...)` in `scripts/check.lua` and prints PASS/FAIL/SKIP. The key-coverage test compares against the installed Claude Code binary (override with `CLAUDE_BIN`) and skips if it cannot be found.
@@ -32,4 +33,4 @@ make preview VARIANT=light
 - After upgrading Claude Code, run `make check`; new theme keys need an entry in `mapping.lua` (missing keys fall back to colorful base values, unknown keys are silently ignored).
 - Design rules (documented in `mapping.lua` header): hierarchy by brightness, status by brightness rather than hue, Clay (`#d97757`) reserved for focus (brand, current mode, permission prompt, selected suggestion).
 - Commit once per completed feature point (one logical change per commit, with its regenerated themes), rather than batching several changes into one commit.
-- Bump `version` in `.claude-plugin/plugin.json` for releases.
+- Releases: add notes under `## [Unreleased]` in `CHANGELOG.md` with each user-visible change; release with `make release VERSION=patch|minor|major` (see README "Releasing"). Never edit the version by hand or add `version` to `marketplace.json`.

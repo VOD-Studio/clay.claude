@@ -308,5 +308,64 @@ test("every shimmer differs from its base color", function()
   end
 end)
 
+-- Versioning -----------------------------------------------------------------
+
+local version = clay.plugin_version()
+
+test("version is MAJOR.MINOR.PATCH and lives only in plugin.json", function()
+  if not clay.parse_version(version) then
+    fail("%s: version %q is not MAJOR.MINOR.PATCH", clay.PLUGIN_JSON, tostring(version))
+  end
+  -- plugin.json wins silently over a marketplace entry's version, so keep one.
+  local plugins = assert(clay.read(clay.MARKETPLACE_JSON)):match('"plugins":%s*(%b[])')
+  if plugins and plugins:find('"version"', 1, true) then
+    fail("%s: remove `version` from the plugin entry; plugin.json is the source", clay.MARKETPLACE_JSON)
+  end
+end)
+
+test("changelog has an Unreleased section and one for each release", function()
+  local text = clay.read(clay.CHANGELOG)
+  if not text then
+    fail("%s is missing", clay.CHANGELOG)
+  end
+  if not clay.changelog_section(text, "Unreleased") then
+    fail("%s has no `## [Unreleased]` section", clay.CHANGELOG)
+  end
+  local out = clay.sh("git tag --list '" .. clay.plugin_name() .. "--v*'")
+  for tag in out:gmatch("[^\n]+") do
+    local v = tag:match("%-%-v(.+)$")
+    if not clay.changelog_section(text, v) then
+      fail("%s has no `## [%s]` section for tag %s", clay.CHANGELOG, v, tag)
+    end
+  end
+end)
+
+-- Users only receive a change when the version string changes, so shipped
+-- changes since the last release must be released with a new version.
+test("version is not behind the last release", function()
+  local _, in_git = clay.sh("git rev-parse --git-dir")
+  if not in_git then
+    return "skip"
+  end
+  local latest = clay.latest_release()
+  if not latest then
+    print(("     no release tag yet; first release: make release VERSION=%s"):format(version))
+    return
+  end
+  local cmp = clay.compare_versions(version, latest)
+  if cmp < 0 then
+    fail("plugin.json %s is older than the last release %s", version, latest)
+  end
+  local _, same = clay.sh(
+    ("git diff --quiet %s -- %s"):format(clay.tag(latest), table.concat(clay.SHIPPED, " "))
+  )
+  if cmp == 0 and not same then
+    print(("     unreleased changes to %s since %s; users get them after `make release`"):format(
+      table.concat(clay.SHIPPED, ", "),
+      clay.tag(latest)
+    ))
+  end
+end)
+
 print(("\n%d passed, %d failed, %d skipped"):format(passed, failed, skipped))
 os.exit(failed == 0 and 0 or 1)

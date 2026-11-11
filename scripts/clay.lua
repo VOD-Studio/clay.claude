@@ -100,4 +100,94 @@ function M.read(path)
   return s
 end
 
+-- Versions and releases ------------------------------------------------------
+
+M.PLUGIN_JSON = ".claude-plugin/plugin.json"
+M.MARKETPLACE_JSON = ".claude-plugin/marketplace.json"
+M.CHANGELOG = "CHANGELOG.md"
+
+-- Paths whose changes reach users and therefore need a version bump.
+M.SHIPPED = { "themes", M.PLUGIN_JSON }
+
+function M.plugin_name()
+  return assert(M.read(M.PLUGIN_JSON)):match('"name":%s*"([^"]*)"')
+end
+
+function M.plugin_version()
+  return assert(M.read(M.PLUGIN_JSON)):match('"version":%s*"([^"]*)"')
+end
+
+-- Tag format used by `claude plugin tag`: <name>--v<version>.
+function M.tag(version)
+  return M.plugin_name() .. "--v" .. version
+end
+
+-- MAJOR.MINOR.PATCH only; returns the three numbers or nil.
+function M.parse_version(v)
+  local a, b, c = tostring(v):match("^(%d+)%.(%d+)%.(%d+)$")
+  if not a then
+    return nil
+  end
+  for _, part in ipairs({ a, b, c }) do
+    if #part > 1 and part:sub(1, 1) == "0" then
+      return nil
+    end
+  end
+  return tonumber(a), tonumber(b), tonumber(c)
+end
+
+-- -1, 0 or 1 as a < b, a == b, a > b.
+function M.compare_versions(a, b)
+  local x, y = { M.parse_version(a) }, { M.parse_version(b) }
+  for i = 1, 3 do
+    if x[i] ~= y[i] then
+      return x[i] < y[i] and -1 or 1
+    end
+  end
+  return 0
+end
+
+function M.bump(version, part)
+  local a, b, c = M.parse_version(version)
+  if part == "major" then
+    return ("%d.0.0"):format(a + 1)
+  elseif part == "minor" then
+    return ("%d.%d.0"):format(a, b + 1)
+  elseif part == "patch" then
+    return ("%d.%d.%d"):format(a, b, c + 1)
+  end
+end
+
+-- Run a shell command; return its trimmed stdout and whether it succeeded.
+function M.sh(cmd)
+  local p = assert(io.popen(cmd .. " 2>/dev/null"))
+  local out = p:read("a")
+  local ok = p:close()
+  return (out:gsub("%s+$", "")), ok == true
+end
+
+-- Highest released version among <name>--v* tags, or nil.
+function M.latest_release()
+  local out = M.sh("git tag --list '" .. M.plugin_name() .. "--v*'")
+  local best
+  for tag in out:gmatch("[^\n]+") do
+    local v = tag:match("%-%-v(.+)$")
+    if v and M.parse_version(v) and (not best or M.compare_versions(v, best) > 0) then
+      best = v
+    end
+  end
+  return best
+end
+
+-- Body of a `## [heading]` section in the changelog, or nil.
+function M.changelog_section(text, heading)
+  local pattern = "\n## %[" .. heading:gsub("%p", "%%%0") .. "%][^\n]*\n"
+  local _, stop = text:find(pattern)
+  if not stop then
+    return nil
+  end
+  local next_start = text:find("\n## ", stop, true)
+  return text:sub(stop + 1, next_start and next_start - 1 or #text)
+end
+
 return M
